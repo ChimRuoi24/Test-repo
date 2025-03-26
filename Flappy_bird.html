@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { text-align: center; font-family: Arial, sans-serif; background: #70c5ce; }
+        canvas { background: #fff; display: block; margin: 20px auto; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Flappy Bird Game</h1>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <script>
+        // Khởi tạo canvas
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Hình ảnh
+        const bird = new Image();
+        const bg = new Image();
+        const fg = new Image();
+        const pipeNorth = new Image();
+        const pipeSouth = new Image();
+
+        bird.src = "https://i.imgur.com/QF2CYiV.png";
+        bg.src = "https://i.imgur.com/aZXxmCx.png";
+        fg.src = "https://i.imgur.com/4zQZ3Rc.png";
+        pipeNorth.src = "https://i.imgur.com/zMxrSHV.png";
+        pipeSouth.src = "https://i.imgur.com/z5MD4yr.png";
+
+        // Biến
+        let gap = 85;
+        let constant;
+        let bX = 10;
+        let bY = 150;
+        let gravity = 1.5;
+        let score = 0;
+
+        // Âm thanh
+        let fly = new Audio();
+        let scor = new Audio();
+        fly.src = "https://www.fesliyanstudios.com/play-mp3/438";
+        scor.src = "https://www.fesliyanstudios.com/play-mp3/439";
+
+        // Khi nhấn phím
+        document.addEventListener("keydown", moveUp);
+        function moveUp() {
+            bY -= 25;
+            fly.play();
+        }
+
+        // Ống
+        let pipe = [];
+        pipe[0] = { x: canvas.width, y: 0 };
+
+        // Vẽ game
+        function draw() {
+            ctx.drawImage(bg, 0, 0);
+
+            for (let i = 0; i < pipe.length; i++) {
+                constant = pipeNorth.height + gap;
+                ctx.drawImage(pipeNorth, pipe[i].x, pipe[i].y);
+                ctx.drawImage(pipeSouth, pipe[i].x, pipe[i].y + constant);
+
+                pipe[i].x--;
+
+                if (pipe[i].x == 125) {
+                    pipe.push({
+                        x: canvas.width,
+                        y: Math.floor(Math.random() * pipeNorth.height) - pipeNorth.height
+                    });
+                }
+
+                // Va chạm
+                if (
+                    (bX + bird.width >= pipe[i].x &&
+                        bX <= pipe[i].x + pipeNorth.width &&
+                        (bY <= pipe[i].y + pipeNorth.height ||
+                            bY + bird.height >= pipe[i].y + constant)) ||
+                    bY + bird.height >= canvas.height - fg.height
+                ) {
+                    location.reload(); // Load lại trang
+                }
+
+                if (pipe[i].x == 5) {
+                    score++;
+                    scor.play();
+                }
+            }
+
+            ctx.drawImage(fg, 0, canvas.height - fg.height);
+            ctx.drawImage(bird, bX, bY);
+            bY += gravity;
+
+            ctx.fillStyle = "#000";
+            ctx.font = "20px Arial";
+            ctx.fillText("Điểm: " + score, 10, canvas.height - 20);
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
+</body>
+</html>
